@@ -1,0 +1,56 @@
+#----import lib----
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+
+def trainNetwork(img):
+    blob = cv2.dnn.blobFromImage(img, swapRB=True)
+    net.setInput(blob)
+    boxes, masks = net.forward(["detection_out_final", "detection_masks"])
+    
+    return boxes, masks
+
+#detection and getting roi 
+def detection(img,detection_count):
+    width=img.shape[1]
+    height=img.shape[0]
+    for i in range(detection_count-50):
+        box = boxes[0, 0, i]
+        class_id = box[1]
+        score = box[2]
+        if score > 0.7:
+            # Boxcoordinates
+            x = int(box[3] * width)
+            y = int(box[4] * height)
+            x2 = int(box[5] * width)
+            y2 = int(box[6] * height)
+            
+            #roi = img[y: y2, x: x2]
+            #roi_height, roi_width, _ = roi.shape
+            # draw bounding boxs
+            cv2.rectangle(img, (x, y), (x2, y2), (255, 0, 0), 3)
+    return img
+
+if __name__ == "__main__":
+    # Loading Mask RCNN
+    net = cv2.dnn.readNetFromTensorflow("dnn/frozen_inference_graph_coco.pb",
+    "dnn/mask_rcnn_inception_v2_coco_2018_01_28.pbtxt")
+    
+    cap=cv2.VideoCapture(0)
+    #cap.set(cv2.CAP_PROP_FPS, 10)
+    
+    while (cap.isOpened):
+    
+        ret, img=cap.read()
+        boxes, masks=trainNetwork(img)
+        #print(boxes[0, 0, 1])
+        detection_count = boxes.shape[2]
+        img=detection(img,detection_count)
+        cv2.imshow("Image", img)    
+        if cv2.waitKey(27) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
