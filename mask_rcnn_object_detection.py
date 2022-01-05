@@ -1,6 +1,4 @@
-import cv2
-import numpy as np
-import matplotlib.pyplot as plt
+
 
 class MaskRCNN:
     """MaskRCNN class take three parameters model weights and config file  and lable_file path"""
